@@ -19,11 +19,20 @@ This codebase uses the most modern standards natively supported by `acme4j`.
 ### 1. Initial Setup (First Certificate Request)
 Before requesting a certificate for the first time on a blank runtime context, you must provision a single-use EAB payload from Google Cloud using its CLI:
 
+#### For Production Certificates:
 ```bash
 gcloud beta publicca external-account-keys create --format=json
 ```
 
-It will print out a payload containing a `keyId` and `b64MacKey`. Extract these and configure your environment:
+#### For Test/Staging Certificates:
+If you are doing integration testing and don't want to burn production limits, override your `gcloud` endpoint to procure Staging EAB keys instead:
+```bash
+gcloud config set api_endpoint_overrides/publicca https://preprod-publicca.googleapis.com/
+gcloud beta publicca external-account-keys create --format=json
+gcloud config unset api_endpoint_overrides/publicca
+```
+
+The command will print out a payload containing a `keyId` and `b64MacKey`. Extract these and configure your environment variables:
 
 ```bash
 export GTS_EAB_KEY_ID="<your-keyId-here>"
@@ -37,9 +46,13 @@ mvn clean package
 ```
 
 ### 3. Execution & Verification Request
-Run the assembled binary with your target domain name:
+Run the assembled binary with your target domain name. Optionally pass `prod` (default) or `test` to route traffic to the respective GTS environment:
+
 ```bash
-java -jar target/acme-gts-client-1.0-SNAPSHOT.jar repon-test.dev.haplorrhini.com
+java -jar target/acme-gts-client-1.0-SNAPSHOT.jar <your-domain> [prod|test]
+
+# Example (Test / Staging Domain Validation)
+java -jar target/acme-gts-client-1.0-SNAPSHOT.jar repon-test.dev.haplorrhini.com test
 ```
 The application will pause and print a challenge payload that **must be propagated** to your domain's DNS `TXT` records. (e.g. `_acme-challenge.<your-domain>.com` -> `<payload>`). 
 Once propagated, press `Enter` to allow the client to confirm with GTS.

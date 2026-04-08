@@ -14,23 +14,30 @@ import java.util.Scanner;
 
 public class GtsAcmeClient {
 
-    private static final String ACME_SERVER_URL = "https://dv.acme-v02.api.pki.goog/directory";
-
     public static void main(String[] args) {
         if (args.length < 1) {
-            System.err.println("Usage: java -jar target/acme-gts-client-1.0-SNAPSHOT.jar <domain-name>");
+            System.err.println("Usage: java -jar target/acme-gts-client-1.0-SNAPSHOT.jar <domain-name> [prod|test]");
             System.exit(1);
         }
         String domain = args[0];
+        String env = args.length > 1 ? args[1] : "prod";
+        
+        String acmeServerUrl;
+        if ("test".equalsIgnoreCase(env)) {
+            acmeServerUrl = "https://dv.acme-v02.test-api.pki.goog/directory";
+        } else {
+            acmeServerUrl = "https://dv.acme-v02.api.pki.goog/directory";
+        }
+
         try {
-            new GtsAcmeClient().fetchCertificate(domain);
+            new GtsAcmeClient().fetchCertificate(domain, acmeServerUrl);
         } catch (Exception e) {
             System.err.println("Failed to fetch certificate: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void fetchCertificate(String domain) throws Exception {
+    public void fetchCertificate(String domain, String acmeServerUrl) throws Exception {
         // 1. Setup KeyPairs
         KeyPair userKey;
         File userKeyFile = new File("user.key");
@@ -46,7 +53,7 @@ public class GtsAcmeClient {
         KeyPair domainKey = KeyPairUtils.createKeyPair(2048);
 
         // 2. Initialize Session
-        Session session = new Session(ACME_SERVER_URL);
+        Session session = new Session(acmeServerUrl);
 
         // 3. Register or find account
         // GTS requires External Account Binding (EAB)
