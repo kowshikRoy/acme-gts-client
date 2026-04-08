@@ -15,18 +15,22 @@ import java.util.Scanner;
 public class GtsAcmeClient {
 
     private static final String ACME_SERVER_URL = "https://dv.acme-v02.api.pki.goog/directory";
-    private static final String DOMAIN = "repon-test.dev.haplorrhini.com";
 
     public static void main(String[] args) {
+        if (args.length < 1) {
+            System.err.println("Usage: java -jar target/acme-gts-client-1.0-SNAPSHOT.jar <domain-name>");
+            System.exit(1);
+        }
+        String domain = args[0];
         try {
-            new GtsAcmeClient().fetchCertificate();
+            new GtsAcmeClient().fetchCertificate(domain);
         } catch (Exception e) {
             System.err.println("Failed to fetch certificate: " + e.getMessage());
             e.printStackTrace();
         }
     }
 
-    public void fetchCertificate() throws Exception {
+    public void fetchCertificate(String domain) throws Exception {
         // 1. Setup KeyPairs
         KeyPair userKey;
         File userKeyFile = new File("user.key");
@@ -79,7 +83,7 @@ public class GtsAcmeClient {
 
         // 4. Create Order
         Order order = account.newOrder()
-                .domain(DOMAIN)
+                .domain(domain)
                 .create();
 
         // 5. Handle Authorizations (DNS-01)
@@ -90,7 +94,7 @@ public class GtsAcmeClient {
 
                 System.out.println("********************************************************************************");
                 System.out.println("Action Required: Add a TXT record to your DNS configuration.");
-                System.out.println("Host: _acme-challenge." + DOMAIN);
+                System.out.println("Host: _acme-challenge." + domain);
                 System.out.println("Value: " + challenge.getDigest());
                 System.out.println("********************************************************************************");
 
@@ -114,7 +118,7 @@ public class GtsAcmeClient {
 
         // 6. Finalize Order
         CSRBuilder csr = new CSRBuilder();
-        csr.addDomain(DOMAIN);
+        csr.addDomain(domain);
         csr.sign(domainKey);
         byte[] encodedCsr = csr.getEncoded();
 

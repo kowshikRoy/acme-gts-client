@@ -37,9 +37,9 @@ mvn clean package
 ```
 
 ### 3. Execution & Verification Request
-Run the assembled binary:
+Run the assembled binary with your target domain name:
 ```bash
-java -jar target/acme-gts-client-1.0-SNAPSHOT.jar
+java -jar target/acme-gts-client-1.0-SNAPSHOT.jar repon-test.dev.haplorrhini.com
 ```
 The application will pause and print a challenge payload that **must be propagated** to your domain's DNS `TXT` records. (e.g. `_acme-challenge.<your-domain>.com` -> `<payload>`). 
 Once propagated, press `Enter` to allow the client to confirm with GTS.
