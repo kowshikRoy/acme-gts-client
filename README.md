@@ -49,10 +49,12 @@ mvn clean package
 Run the assembled binary with your target domain name. Optionally pass `prod` (default) or `test` to route traffic to the respective GTS environment:
 
 ```bash
-java -jar target/acme-gts-client-1.0-SNAPSHOT.jar <your-domain> [prod|test]
+# Note: You must execute this using your brewed Java 17+ binary since the project enforces version 61.0 classes!
+# If your default system `java` is Java 11 (class version 55), explicitly use the Brew path:
+/usr/local/Cellar/openjdk/18.0.1.1/libexec/openjdk.jdk/Contents/Home/bin/java -jar target/acme-gts-client-1.0-SNAPSHOT.jar <your-domain> [prod|test]
 
 # Example (Test / Staging Domain Validation)
-java -jar target/acme-gts-client-1.0-SNAPSHOT.jar repon-test.dev.haplorrhini.com test
+/usr/local/Cellar/openjdk/18.0.1.1/libexec/openjdk.jdk/Contents/Home/bin/java -jar target/acme-gts-client-1.0-SNAPSHOT.jar az-dees-wedding.dev.haplorrhini.com test
 ```
 The application will pause and print a challenge payload that **must be propagated** to your domain's DNS `TXT` records. (e.g. `_acme-challenge.<your-domain>.com` -> `<payload>`). 
 Once propagated, press `Enter` to allow the client to confirm with GTS.
